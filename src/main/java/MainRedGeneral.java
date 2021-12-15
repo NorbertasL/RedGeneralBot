@@ -1,5 +1,4 @@
-import connections.localNoSQL.LocalConnTypes;
-import connections.localNoSQL.LocalConnect;
+import connections.localNoSQL.JsonCreator;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import org.apache.logging.log4j.LogManager;
@@ -22,8 +21,7 @@ public class MainRedGeneral {
         }
         jda = JDABuilder.createDefault(TOKEN).build().awaitReady();
 
-        LocalConnect.connect(LocalConnTypes.SET_DATA);
-        LocalConnect.connect(LocalConnTypes.GET_DATA);
+        new JsonCreator();
 
         logger.info("\u001B[32mBot is up and running....");
 
