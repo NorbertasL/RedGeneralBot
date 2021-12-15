@@ -1,3 +1,4 @@
+import connections.localNoSQL.JsonCreator;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import org.apache.logging.log4j.LogManager;
@@ -20,7 +21,7 @@ public class MainRedGeneral {
         }
         jda = JDABuilder.createDefault(TOKEN).build().awaitReady();
 
-        //new JsonCreator();
+        new JsonCreator();
 
         logger.info("\u001B[32mBot is up and running....");
 
