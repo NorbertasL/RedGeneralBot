@@ -1,3 +1,4 @@
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.channel.ChannelCreateEvent;
 import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.guild.voice.*;
@@ -61,11 +62,18 @@ public class EvenListener extends ListenerAdapter {
                 event.getChannelType()));
     }
     public void onMessageReceived(MessageReceivedEvent event) {
+        switch (event.getChannelType()){
+            case PRIVATE -> onBotPrivateMessage(event);
+        }
         logger.debug(String.format("onMessageReceived: %s has posted \"%s\" in %s %s channel.",
-                event.getMember().getEffectiveName(),
+                //WARNING event.getMember return null on Private Messages
+                //Using event.getMessage().getAuthor().getName() with lambda to fix it
+                event.getMember() == null ? event.getMessage().getAuthor().getName()
+                        : event.getMember().getEffectiveName()+"("+event.getMessage().getAuthor().getAsTag()+")",
                 event.getMessage(),
                 event.getChannel().getName(),
                 event.getChannelType()));
+
     }
 
     //TODO List of on methods I would like to implement
@@ -99,5 +107,12 @@ public class EvenListener extends ListenerAdapter {
     public void onVoiceDelete(ChannelDeleteEvent event){
         logger.debug(String.format("onVoiceDelete: %s VOICE channel has been deleted.",
                 event.getChannel().getName()));
+    }
+
+    public void onBotPrivateMessage(MessageReceivedEvent event){
+        logger.debug(String.format("onBotPrivateMessage: %s has PMed bot with \"%s\".",
+                event.getMessage().getAuthor().getAsTag(),
+                event.getMessage()));
+
     }
 }
