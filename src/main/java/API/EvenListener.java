@@ -1,4 +1,5 @@
-import net.dv8tion.jda.api.entities.ChannelType;
+package API;
+
 import net.dv8tion.jda.api.events.channel.ChannelCreateEvent;
 import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.guild.voice.*;

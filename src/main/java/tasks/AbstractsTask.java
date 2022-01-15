@@ -18,6 +18,13 @@ public abstract class AbstractsTask {
 
         public abstract CredentialWrapper getCredentials();
 
+
+        /**
+         * Channel permission take priority over Category permissions
+         * Example: Category is ignored but one of the channels in the category has enabled permissions.Result will be
+         * that the channel will still listen and respond to the command but all other channels in the category will
+         * ignore them.
+        **/
         private CommandResponse credentialCheck(Member member, TextChannel channel) {
             // DB check the credentials, if empty use default
 
