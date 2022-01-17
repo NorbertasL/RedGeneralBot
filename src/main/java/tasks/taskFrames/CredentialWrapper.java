@@ -3,12 +3,14 @@
  * and channels/categories that listen for them or the ones that ignore them.
  */
 
-package tasks.managers;
+package tasks.taskFrames;
 import java.util.HashMap;
 
 public class CredentialWrapper {
+    //All credential data is stored as a String array inside a hashmap with keys based on KEYS enum
     private HashMap<KEYS, String[]> credentials = new HashMap<>();
 
+    //Making sure that all KEYS are initialized in HashMap
     public CredentialWrapper(){
         for (KEYS key: KEYS.values()){
            credentials.put(key, null);
@@ -20,11 +22,11 @@ public class CredentialWrapper {
         return this;
     }
 
-    public HashMap getCredentials(){
-        return credentials;
+    public String[] getCredentials(KEYS key){
+        return credentials.get(key);
     }
 
     public enum KEYS{
-        ROLES, ACTIVE_CHANNELS, IGNORED_CHANNELS, ACTIVE_CATEGORIES, IGNORED_CATEGORIES;
+        ROLES, ACTIVE_CHANNELS, ACTIVE_CATEGORIES;
     }
 }
