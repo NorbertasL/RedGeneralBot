@@ -1,4 +1,5 @@
 package tasks.msgCommands;
+import helperTools.MsgHelper;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,10 +23,7 @@ public class Ping extends AbstractCommandTask {
     protected void execute(CredentialCheckResponse response, MessageReceivedEvent event) {
         if (response == CredentialCheckResponse.OK) {
             logger.debug("response: OK");
-            //event.getMember() returns null for PMs
-            String callerName = event.getMember() == null
-                    ? event.getMessage().getAuthor().getName() : event.getMember().getEffectiveName();
-            event.getChannel().sendMessage("I'm here " + callerName + "!").queue();
+            event.getChannel().sendMessage("I'm here " + MsgHelper.getMsgUserNickOrName(event) + "!").queue();
         }else if (response == CredentialCheckResponse.INVALID_CHANNEL){
             logger.debug("response: INVALID_CHANNEL");
         }
