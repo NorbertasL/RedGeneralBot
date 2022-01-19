@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tasks.msgCommands.CountDown;
 import tasks.msgCommands.Ping;
 import tasks.taskFrames.AbstractCommandTask;
 
@@ -19,6 +20,7 @@ public class MsgCommandManager extends ListenerAdapter {
     public MsgCommandManager(){
         //Add in all commandTasks
         tasks.add(new Ping());
+        tasks.add(new CountDown());
     }
 
     @Override

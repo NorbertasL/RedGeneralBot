@@ -2,14 +2,20 @@ package tasks.msgCommands;
 
 import helperTools.MsgHelper;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import tasks.taskFrames.AbstractCommandTask;
 import tasks.taskFrames.CredentialWrapper;
 
+import java.time.OffsetDateTime;
+import java.util.stream.Stream;
+
 public class CountDown extends AbstractCommandTask {
-    protected CountDown() {
+    private static final Logger logger = LogManager.getLogger(CountDown.class);
+    public CountDown() {
         super("cd");
         this.setCredentialsWrapper(new CredentialWrapper()
-                .addCredential(CredentialWrapper.KEYS.ROLES, "event_manager"));
+                .addCredential(CredentialWrapper.KEYS.ROLES, "event manager"));
     }
 
     @Override
@@ -60,8 +66,28 @@ public class CountDown extends AbstractCommandTask {
             }
             String msg = msgArr[1].strip();
             if(msg.startsWith("to")){
-                //-extract date if present
+                msg = msg.substring(2).strip();
                 //-extract time if present
+                //TODO do a check format and null check
+                String timeString = msg.split(" ", 2)[0];
+                logger.debug("Extracted time is :"+timeString);
+                OffsetDateTime eventTS = event.getMessage().getTimeCreated();
+                //Converts the string time into int array for h/m/s
+                //TODO catch exception
+                int [] timeParts = Stream.of(timeString.split(":")).mapToInt(Integer::parseInt).toArray();
+                //TODO check if numbers are in the correct range
+                OffsetDateTime userConvertedTime = eventTS.plusHours(timeParts[0]-eventTS.getHour());
+                userConvertedTime = userConvertedTime.plusMinutes(timeParts[1]-eventTS.getMinute());
+                if(timeParts.length >=3){
+                    userConvertedTime = userConvertedTime.plusSeconds(timeParts[2]-eventTS.getSecond());
+                }
+                event.getChannel().sendMessage("<t:"+userConvertedTime.toEpochSecond()+":R>").queue();
+
+
+                //-extract date if present
+                //TODO do a check format and null check
+                String dateString = msg.split(" ",3)[1];
+                logger.debug("Extracted date is :"+dateString);
             }
 
 
