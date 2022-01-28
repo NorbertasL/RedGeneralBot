@@ -8,6 +8,10 @@ import tasks.taskFrames.AbstractCommandTask;
 import tasks.taskFrames.CredentialWrapper;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CountDown extends AbstractCommandTask {
@@ -64,30 +68,78 @@ public class CountDown extends AbstractCommandTask {
 
                 return;
             }
+
+            logger.debug("System time is:"+ OffsetDateTime.now());
+
             String msg = msgArr[1].strip();
             if(msg.startsWith("to")){
+                OffsetDateTime eventTS = event.getMessage().getTimeCreated();
+                logger.debug("Msg local time is:"+eventTS);
                 msg = msg.substring(2).strip();
                 //-extract time if present
                 //TODO do a check format and null check
                 String timeString = msg.split(" ", 2)[0];
                 logger.debug("Extracted time is :"+timeString);
-                OffsetDateTime eventTS = event.getMessage().getTimeCreated();
+
                 //Converts the string time into int array for h/m/s
                 //TODO catch exception
-                int [] timeParts = Stream.of(timeString.split(":")).mapToInt(Integer::parseInt).toArray();
+                List<Integer> timeParts = Stream.of(timeString.split(":")).map(Integer::valueOf)
+                        .collect(Collectors.toList());
                 //TODO check if numbers are in the correct range
-                OffsetDateTime userConvertedTime = eventTS.plusHours(timeParts[0]-eventTS.getHour());
-                userConvertedTime = userConvertedTime.plusMinutes(timeParts[1]-eventTS.getMinute());
-                if(timeParts.length >=3){
-                    userConvertedTime = userConvertedTime.plusSeconds(timeParts[2]-eventTS.getSecond());
+                if(timeParts.size() < 3){// No seconds so we add 0
+                    timeParts.add(0);//Adding Seconds
                 }
-                event.getChannel().sendMessage("<t:"+userConvertedTime.toEpochSecond()+":R>").queue();
+                timeParts.add(0);//Adding milliseconds, it will be needed for making OffsetDateTime object
 
 
                 //-extract date if present
                 //TODO do a check format and null check
-                String dateString = msg.split(" ",3)[1];
-                logger.debug("Extracted date is :"+dateString);
+                String dateString = null;//This is kind of bad
+                try {
+                    dateString = msg.split(" ",3)[1];
+                }catch (ArrayIndexOutOfBoundsException e){
+                    //Don't care, just means user didn't specify time
+                }
+
+                String message = "";
+                List<Integer> dateParts = new ArrayList<>();
+                if(dateString != null && dateString.matches("[0-9/]+")){
+                    logger.debug("Extracted date is :"+dateString);
+                    //Order we follow is DD/MM/YY or YYYY and DD/MM (no year we just assume this year)
+                    dateParts = Stream.of(dateString.split("/")).map(Integer::parseInt)
+                            .collect(Collectors.toList());
+                    try{
+                        message = msg.split(" ", 3)[2];
+                    }catch (ArrayIndexOutOfBoundsException e){
+                        //Don't care, just mean there is no message
+                        message = " ";
+                    }
+
+
+                }
+                if(dateParts.isEmpty()){
+                    dateParts.add(eventTS.getDayOfMonth()); //Adding day
+                    dateParts.add(eventTS.getMonthValue()); //Adding month
+                    dateParts.add(eventTS.getYear()); //Adding year
+                }else if (dateParts.size() == 2){ // Need to add the tear
+                    dateParts.add(eventTS.getYear()); //Adding year
+                }
+
+                //Constructing the new OffsetDateTime base dof user input
+                OffsetDateTime eventTime = OffsetDateTime.of(dateParts.get(2), dateParts.get(1), dateParts.get(0)
+                        , timeParts.get(0), timeParts.get(1), timeParts.get(2), timeParts.get(3), eventTS.getOffset());
+
+                if (message.isEmpty()) {
+                    try{
+                        message = msg.split(" ", 2)[1];
+                    }catch (ArrayIndexOutOfBoundsException e){
+                        //Don't care, just mean there is no message
+                    }
+
+                }
+                // Printing out the CD
+                event.getChannel().sendMessage("<t:"+eventTime.toEpochSecond()+":R> "+ message).queue();
+
             }
 
 
