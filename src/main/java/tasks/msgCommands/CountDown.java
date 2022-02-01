@@ -1,5 +1,6 @@
 package tasks.msgCommands;
 
+import helperTools.DataExtractor;
 import helperTools.MsgHelper;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.apache.logging.log4j.LogManager;
@@ -69,7 +70,6 @@ public class CountDown extends AbstractCommandTask {
                 return;
             }
 
-            logger.debug("System time is:"+ OffsetDateTime.now());
 
             String msg = msgArr[1].strip();
             if(msg.startsWith("to")){
@@ -81,15 +81,17 @@ public class CountDown extends AbstractCommandTask {
                 String timeString = msg.split(" ", 2)[0];
                 logger.debug("Extracted time is :"+timeString);
 
-                //Converts the string time into int array for h/m/s
-                //TODO catch exception
-                List<Integer> timeParts = Stream.of(timeString.split(":")).map(Integer::valueOf)
-                        .collect(Collectors.toList());
-                //TODO check if numbers are in the correct range
-                if(timeParts.size() < 3){// No seconds so we add 0
-                    timeParts.add(0);//Adding Seconds
+                List<Integer> timeParts;
+                try{
+                    timeParts = DataExtractor.getTimeListFromString(timeString, ":");
+                }catch (NumberFormatException e){
+                    event.getChannel().sendMessage("NumberFormatException: "+e.getMessage()).queue();
+                    return;
+                }catch (IllegalArgumentException e){
+                    event.getChannel().sendMessage("Please use ':' to separate HH:MM:SS eg: 11:23:59").queue();
+                    return;
                 }
-                timeParts.add(0);//Adding milliseconds, it will be needed for making OffsetDateTime object
+
 
 
                 //-extract date if present
@@ -139,6 +141,8 @@ public class CountDown extends AbstractCommandTask {
                 }
                 // Printing out the CD
                 event.getChannel().sendMessage("<t:"+eventTime.toEpochSecond()+":R> "+ message).queue();
+
+            }else{
 
             }
 
